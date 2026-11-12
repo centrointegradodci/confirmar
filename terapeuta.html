@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Integrakids · Minha agenda</title>
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#F4F8F9;color:#263E43;-webkit-text-size-adjust:100%}
+  .bar{display:flex;height:8px}.bar i{flex:1}
+  .box{max-width:520px;margin:0 auto;padding:18px 16px 34px}
+  h1{margin:4px 0 0;font-size:28px;letter-spacing:-.5px}h1 span{color:#7EB1BC}
+  .sub{margin:2px 0 14px;color:#F1884C;font-weight:700;font-size:15px}
+  .quem{font-size:20px;font-weight:700;margin:0 0 2px}
+  .at{color:#6B7F83;font-size:12.5px;margin:0 0 14px}
+  .tabs{display:flex;gap:8px;overflow-x:auto;margin:0 0 12px;padding-bottom:2px}
+  .tabs button{flex:0 0 auto;border:0;border-radius:999px;padding:11px 16px;font-size:15px;font-weight:700;background:#E3EEF0;color:#2F5158;cursor:pointer;min-height:44px}
+  .tabs button.on{background:#7EB1BC;color:#fff}
+  .res{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:0 0 12px}
+  .res div{background:#fff;border-radius:12px;padding:9px 6px;text-align:center;box-shadow:0 1px 3px rgba(38,62,67,.07)}
+  .res b{display:block;font-size:22px}.res small{font-size:11.5px;color:#56696D}
+  .res .s b{color:#3B934C}.res .n b{color:#E2524E}.res .a b{color:#B07A12}
+  .it{display:flex;align-items:center;gap:10px;background:#fff;border-radius:12px;padding:12px 12px;margin:0 0 8px;box-shadow:0 1px 3px rgba(38,62,67,.07);border-left:6px solid #D5DEE0}
+  .it.sim{border-left-color:#3B934C}.it.nao{border-left-color:#E2524E}.it.env{border-left-color:#E0B341}
+  .it .h{font-weight:700;font-size:17px;min-width:52px}
+  .it .n{flex:1;font-size:15px;line-height:1.3}.it .n small{display:block;color:#6B7F83;font-size:12.5px;margin-top:2px}
+  .bd{font-size:12px;font-weight:700;border-radius:999px;padding:5px 9px;white-space:nowrap}
+  .bd.sim{background:#E3F2E5;color:#1F5A2C}.bd.nao{background:#FCE4E2;color:#8A2420}.bd.env{background:#FFF3D6;color:#7A5300}.bd.x{background:#EEF2F3;color:#56696D}
+  .ok{display:block;width:100%;border:0;border-radius:14px;padding:17px;font-size:17px;font-weight:700;margin:14px 0 8px;cursor:pointer;background:#ACD5AF;color:#1F4A2A;min-height:52px}
+  .ok:disabled{opacity:.6}
+  .cie{background:#E8F4E9;color:#1F4A2A;border-radius:12px;padding:12px;text-align:center;font-weight:700;margin:14px 0 8px}
+  .msg{background:#FFF8E1;color:#6B5A00;border-radius:12px;padding:12px;font-size:14px;margin:0 0 12px}
+  .vz{color:#6B7F83;font-size:14px;padding:14px 4px}
+  .rf{border:0;background:none;color:#4F8F9C;font-weight:700;font-size:14px;padding:10px 0;cursor:pointer;min-height:44px}
+  .pe{color:#6B7F83;font-size:12.5px;margin-top:16px;line-height:1.45}
+</style>
+</head>
+<body>
+<div class="bar"><i style="background:#7EB1BC"></i><i style="background:#ACD5AF"></i><i style="background:#BDA8CC"></i><i style="background:#F1884C"></i><i style="background:#F5E764"></i><i style="background:#E2524E"></i></div>
+<div class="box">
+  <h1><span>Integra</span>kids</h1>
+  <p class="sub">Minha agenda · confirmações das famílias</p>
+  <div id="app"><p class="vz">Carregando…</p></div>
+  <p class="pe">Link pessoal: não repasse. As respostas dos pais pelo link aparecem aqui na hora; as confirmações feitas pela recepção entram quando o sistema da clínica atualiza.</p>
+</div>
+<script>
+  var EXEC = 'https://script.google.com/macros/s/AKfycbyeEdYKgi0UwGIWvSZ9o9a_EdxqC4vgvRt1_Nevdkqey54yhMSR0f8FTLoIqs41mlo1/exec';
+  var P = (new URLSearchParams(location.search).get('p') || '').replace(/[^A-Za-z0-9]/g, '').slice(0, 24);
+  var $ = function (id) { return document.getElementById(id); };
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  var N = 0;
+  function pega(q) {
+    return new Promise(function (ok, falha) {
+      var nome = '__tr' + (++N) + '_' + Date.now(), s = document.createElement('script'), fim = false;
+      var limpa = function () { fim = true; try { delete window[nome]; } catch (e) { window[nome] = undefined; } if (s.parentNode) s.parentNode.removeChild(s); };
+      window[nome] = function (j) { if (fim) return; limpa(); ok(j); };
+      s.onerror = function () { if (fim) return; limpa(); falha(new Error('rede')); };
+      setTimeout(function () { if (fim) return; limpa(); falha(new Error('tempo')); }, 20000);
+      s.src = EXEC + '?' + q + '&cb=' + nome + '&_=' + Date.now();
+      document.body.appendChild(s);
+    });
+  }
+  var DIAS = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'];
+  function hojeISO() { var d = new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+  function rotulo(d) {
+    var h = hojeISO(), dt = new Date(d + 'T12:00:00'), am = new Date(h + 'T12:00:00'); am.setDate(am.getDate() + 1);
+    var ddmm = d.slice(8) + '/' + d.slice(5, 7);
+    if (d === h) return 'Hoje ' + ddmm;
+    if (dt.toDateString() === am.toDateString()) return 'Amanhã ' + ddmm;
+    return DIAS[dt.getDay()].replace(/^./, function (x) { return x.toUpperCase(); }) + ' ' + ddmm;
+  }
+  function hora(iso) { try { var d = new Date(iso); if (isNaN(d)) return ''; return d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }); } catch (e) { return ''; } }
+  function quando(iso) { try { var d = new Date(iso); if (isNaN(d)) return ''; return d.toLocaleDateString('pt-BR').slice(0, 5) + ' às ' + hora(iso); } catch (e) { return ''; } }
+  var BD = { sim: ['SIM · confirmado', 'sim'], nao: ['NÃO · falta avisada', 'nao'], env: ['aguardando resposta', 'env'], '': ['a confirmar', 'x'] };
+  var DADOS = null, SEL = '';
+  function desenha() {
+    var a = DADOS.ag || {}, dias = a.dias || [], itens = a.itens || [];
+    if (!SEL || dias.indexOf(SEL) < 0) SEL = dias.length > 1 ? dias[1] : (dias[0] || '');
+    var L = itens.filter(function (x) { return x.d === SEL; });
+    var c = { sim: 0, nao: 0, env: 0, x: 0 }; L.forEach(function (x) { if (x.st === 'sim') c.sim++; else if (x.st === 'nao') c.nao++; else if (x.st === 'env') c.env++; else c.x++; });
+    var cie = (DADOS.cie || {})[SEL];
+    var h = '<p class="quem">' + esc(/raul|jo[aã]o|pedro|tio/i.test(a.curto || '') ? 'tio ' : 'tia ') + esc(a.curto || a.prof || '') + '</p>' +
+      '<p class="at">Agenda enviada pela clínica ' + (a.g ? quando(a.g) : '') + ' · <button class="rf" id="rf" type="button">↻ atualizar</button></p>' +
+      '<div class="tabs">' + dias.map(function (d) { return '<button type="button" data-d="' + d + '" class="' + (d === SEL ? 'on' : '') + '">' + esc(rotulo(d)) + '</button>'; }).join('') + '</div>' +
+      '<div class="res"><div><b>' + L.length + '</b><small>sessões</small></div><div class="s"><b>' + c.sim + '</b><small>SIM</small></div><div class="n"><b>' + c.nao + '</b><small>NÃO</small></div><div class="a"><b>' + (c.env + c.x) + '</b><small>sem resposta</small></div></div>' +
+      (L.length ? L.map(function (x) {
+        var b = BD[x.st] || BD[''];
+        return '<div class="it ' + b[1] + '"><span class="h">' + esc(x.h) + '</span><span class="n">' + esc(x.n) + (x.q || x.pl ? '<small>' + esc([x.pl, x.st === 'sim' || x.st === 'nao' ? (x.q || '') + (x.m ? ' · ' + quando(x.m) : '') : ''].filter(Boolean).join(' · ')) + '</small>' : '') + '</span><span class="bd ' + b[1] + '">' + b[0] + '</span></div>';
+      }).join('') : '<p class="vz">Sem sessões neste dia.</p>') +
+      (L.length ? (cie ? '<div class="cie">✓ Você marcou ciente em ' + esc(quando(cie)) + '</div><button class="ok" id="ok" type="button" style="background:#E3EEF0;color:#2F5158">Marcar ciente de novo</button>'
+        : '<button class="ok" id="ok" type="button">✓ Estou ciente da agenda de ' + esc(rotulo(SEL).toLowerCase()) + '</button>') : '') +
+      '<div id="ms"></div>';
+    $('app').innerHTML = h;
+    Array.prototype.forEach.call(document.querySelectorAll('.tabs button'), function (b) { b.onclick = function () { SEL = b.getAttribute('data-d'); desenha(); }; });
+    $('rf').onclick = carrega;
+    var ok = $('ok');
+    if (ok) ok.onclick = function () {
+      ok.disabled = true;
+      pega('a=ok&p=' + P + '&d=' + SEL).then(function (j) {
+        if (!j || !j.ok) throw new Error('falha');
+        DADOS.cie = DADOS.cie || {}; DADOS.cie[SEL] = new Date().toISOString(); desenha();
+      }).catch(function () { ok.disabled = false; $('ms').innerHTML = '<div class="msg">Não foi possível registrar agora. Tente de novo em instantes.</div>'; });
+    };
+  }
+  function carrega() {
+    return pega('a=ter&p=' + P).then(function (j) {
+      if (!j || !j.ok) { $('app').innerHTML = '<div class="msg">' + (j && j.erro === 'sem agenda' ? 'Sua agenda ainda não foi enviada pela clínica. Peça à recepção para tocar em "Atualizar celulares agora".' : 'Este link está incompleto. Peça o seu link à recepção.') + '</div>'; return; }
+      DADOS = j; desenha();
+    }).catch(function () { if (!DADOS) $('app').innerHTML = '<div class="msg">Sem conexão com a agenda agora. Confira a internet e toque para tentar de novo.</div>'; });
+  }
+  if (!P) $('app').innerHTML = '<div class="msg">Este link está incompleto. Peça o seu link à recepção.</div>';
+  else { carrega(); setInterval(function () { if (!document.hidden) carrega(); }, 60000); }
+</script>
+</body>
+</html>
