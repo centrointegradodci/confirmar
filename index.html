@@ -48,7 +48,19 @@
   var $ = function (id) { return document.getElementById(id); };
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function msg(cls, t) { var o = $('ok'); o.className = 'ok ' + cls; o.textContent = t; }
-  function pega(q) { return fetch(EXEC + '?' + q, { cache: 'no-store' }).then(function (r) { return r.json(); }); }
+  /* JSONP: a resposta do Google volta como script (o navegador não bloqueia, ao contrário do fetch) */
+  var N = 0;
+  function pega(q) {
+    return new Promise(function (ok, falha) {
+      var nome = '__ik' + (++N) + '_' + Date.now(), s = document.createElement('script'), fim = false;
+      var limpa = function () { fim = true; try { delete window[nome]; } catch (e) { window[nome] = undefined; } if (s.parentNode) s.parentNode.removeChild(s); };
+      window[nome] = function (j) { if (fim) return; limpa(); ok(j); };
+      s.onerror = function () { if (fim) return; limpa(); falha(new Error('rede')); };
+      setTimeout(function () { if (fim) return; limpa(); falha(new Error('tempo')); }, 20000);
+      s.src = EXEC + '?' + q + '&cb=' + nome + '&_=' + Date.now();
+      document.body.appendChild(s);
+    });
+  }
   if (!C) { $('ld').hidden = true; msg('e', 'Este link está incompleto. Por favor, responda pela conversa do WhatsApp com a recepção.'); }
   else {
     pega('a=conv&c=' + C).then(function (j) {
