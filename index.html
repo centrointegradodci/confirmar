@@ -24,6 +24,10 @@
   .ok.s{background:#E8F4E9;color:#1F4A2A}.ok.n{background:#F1ECF6;color:#3E2A55}.ok.e{background:#FFF8E1;color:#6B5A00;font-size:15px;font-weight:400}
   .pe{color:#6B7F83;font-size:13px;margin-top:18px;line-height:1.45}
   .ld{color:#6B7F83;font-size:14px;margin:6px 0 14px}
+  .av{background:#EEF6F7;border-radius:12px;padding:11px 13px;margin:0 0 14px;font-size:14px;line-height:1.45;color:#2F5158}
+  .tc{background:#fff;border:1px solid #DCE7E9;border-radius:12px;padding:11px 13px;margin:0 0 14px;font-size:13.5px;line-height:1.5;color:#3B5156}
+  .tc b{color:#263E43}
+  .rg{font-size:13px;color:#56696D;text-align:center;margin:-4px 0 12px}
 </style>
 </head>
 <body>
@@ -31,10 +35,13 @@
 <div class="box">
   <h1><span>Integra</span>kids</h1>
   <p class="sub">Confirmação de agenda</p>
+  <div class="av">Estamos melhorando cada vez mais o atendimento a vocês. Agradecemos a compreensão e a parceria de sempre.</div>
   <div id="cv"></div>
   <div id="ja"></div>
   <div id="ok"></div>
+  <div id="rg" class="rg"></div>
   <div id="bt" hidden>
+    <div class="tc"><b>Ao tocar em SIM</b>, você confirma a presença da criança nos horários acima e assume o compromisso com a agenda combinada com a clínica. <b>Ao tocar em NÃO</b>, a falta fica avisada e a recepção fala com você pelo WhatsApp. A resposta fica registrada com data e hora.</div>
     <button class="sim" data-r="sim">SIM, vamos</button>
     <button class="nao" data-r="nao">NÃO poderemos ir</button>
   </div>
@@ -72,10 +79,11 @@
       b.onclick = function () {
         var r = b.getAttribute('data-r'), L = document.querySelectorAll('#bt button');
         for (var i = 0; i < L.length; i++) L[i].disabled = true;
-        pega('a=r&t=' + C + '&r=' + r).then(function (j) {
+        pega('a=r&t=' + C + '&r=' + r + '&ac=v1').then(function (j) {
           if (!j || !j.ok) throw new Error('falha');
           $('bt').hidden = true; $('ja').innerHTML = '';
           msg(j.r === 'nao' ? 'n' : 's', j.r === 'nao' ? 'Recebemos o seu aviso. A recepção vai falar com você pelo WhatsApp.' : 'Obrigado! Presença confirmada. Até lá!');
+          var a = new Date(); $('rg').textContent = 'Resposta registrada em ' + a.toLocaleDateString('pt-BR') + ' às ' + a.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) + '.';
         }).catch(function () {
           for (var i = 0; i < L.length; i++) L[i].disabled = false;
           msg('e', 'Não foi possível registrar agora. Tente de novo em instantes ou responda pelo WhatsApp.');
