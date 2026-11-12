@@ -63,7 +63,7 @@
   }
   if (!C) { $('ld').hidden = true; msg('e', 'Este link está incompleto. Por favor, responda pela conversa do WhatsApp com a recepção.'); }
   else {
-    pega('a=conv&c=' + C).then(function (j) {
+    pega('a=conv&t=' + C).then(function (j) {
       $('ld').hidden = true; $('bt').hidden = false;
       if (j && j.cv) $('cv').innerHTML = '<div class="card"><b>' + esc(j.cv.n) + '</b><div class="q">' + esc(j.cv.q) + '</div><pre>' + esc(j.cv.s) + '</pre></div>';
       if (j && j.ul) $('ja').innerHTML = '<div class="ja">Já recebemos sua resposta: <b>' + (j.ul.r === 'nao' ? 'NÃO poderemos ir' : 'SIM, vamos') + '</b>. Se precisar, pode mudar abaixo.</div>';
@@ -72,7 +72,7 @@
       b.onclick = function () {
         var r = b.getAttribute('data-r'), L = document.querySelectorAll('#bt button');
         for (var i = 0; i < L.length; i++) L[i].disabled = true;
-        pega('a=r&c=' + C + '&r=' + r).then(function (j) {
+        pega('a=r&t=' + C + '&r=' + r).then(function (j) {
           if (!j || !j.ok) throw new Error('falha');
           $('bt').hidden = true; $('ja').innerHTML = '';
           msg(j.r === 'nao' ? 'n' : 's', j.r === 'nao' ? 'Recebemos o seu aviso. A recepção vai falar com você pelo WhatsApp.' : 'Obrigado! Presença confirmada. Até lá!');
